@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsuranceIQ — Premium & Risk Analytics</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.js"></script>
+
+<style>
+:root{
+  --navy-950:#081226;
+  --navy-900:#0b1d3a;
+  --navy-800:#132a52;
+  --navy-700:#1c3968;
+  --cyan-500:#12b6c9;
+  --cyan-400:#3fd0e0;
+  --ink-900:#101828;
+  --ink-600:#4b5768;
+  --ink-400:#8894a3;
+  --line:#e4e9f1;
+  --bg:#f5f7fb;
+  --white:#ffffff;
+  --up:#1a9c6e;
+  --warn:#c9832d;
+  --radius-lg:20px;
+  --radius-md:14px;
+  --radius-sm:10px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--ink-900);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{
+  font-family:'Space Grotesk',sans-serif;
+  letter-spacing:-0.01em;
+}
+img,svg{display:block;}
+a{color:inherit;}
+.icon{width:18px;height:18px;stroke-width:2px;}
+
+/* ---------- Layout helpers ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+section{padding:64px 0;}
+.eyebrow-none{display:none;}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky;top:0;z-index:40;
+  background:rgba(8,18,38,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 28px;max-width:1180px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--cyan-400),var(--cyan-500));
+  display:flex;align-items:center;justify-content:center;
+  color:var(--navy-950);
+}
+.brand-text h1{color:#fff;font-size:18px;margin:0;line-height:1.1;}
+.brand-text span{color:#9db3d1;font-size:12.5px;}
+nav{display:flex;align-items:center;gap:26px;}
+nav a{
+  color:#c4d2e6;text-decoration:none;font-size:14px;font-weight:500;
+  transition:color .15s;
+}
+nav a:hover{color:#fff;}
+.status-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 13px;border-radius:100px;
+  background:rgba(26,156,110,0.14);
+  border:1px solid rgba(26,156,110,0.35);
+  color:#5fe0ac;font-size:12.5px;font-weight:600;
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#3fe6ac;box-shadow:0 0 0 3px rgba(63,230,172,0.25);}
+.nav-toggle{display:none;background:none;border:none;color:#fff;cursor:pointer;}
+
+/* ---------- Hero ---------- */
+.hero{
+  background:
+    radial-gradient(circle at 18% -10%, rgba(63,208,224,0.25), transparent 45%),
+    linear-gradient(180deg,var(--navy-950),var(--navy-900) 60%, var(--navy-800));
+  color:#fff;padding:88px 0 76px;
+}
+.hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:56px;align-items:center;}
+.hero h2{font-size:46px;line-height:1.08;margin:0 0 20px;color:#fff;}
+.hero h2 em{font-style:normal;color:var(--cyan-400);}
+.hero p{font-size:16.5px;line-height:1.65;color:#b7c5dc;max-width:520px;margin:0 0 30px;}
+.hero-actions{display:flex;gap:14px;}
+.btn{
+  border:none;border-radius:11px;padding:13px 22px;font-size:14.5px;font-weight:600;
+  cursor:pointer;transition:transform .15s, box-shadow .15s;font-family:inherit;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--cyan-400),var(--cyan-500));
+  color:var(--navy-950);
+  box-shadow:0 12px 30px -10px rgba(18,182,201,0.6);
+}
+.btn-primary:hover{transform:translateY(-2px);}
+.btn-ghost{
+  background:rgba(255,255,255,0.06);color:#fff;border:1px solid rgba(255,255,255,0.18);
+}
+.btn-ghost:hover{background:rgba(255,255,255,0.12);}
+
+.hero-card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--radius-lg);
+  padding:26px;
+  backdrop-filter:blur(6px);
+}
+.hero-card-row{display:flex;justify-content:space-between;align-items:baseline;padding:13px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
+.hero-card-row:last-child{border-bottom:none;}
+.hero-card-row .label{color:#9db3d1;font-size:13.5px;}
+.hero-card-row .value{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;color:#fff;}
+.hero-card-title{font-size:13px;text-transform:none;color:#7f93b3;margin-bottom:6px;}
+
+/* ---------- Section headings ---------- */
+.section-head{max-width:640px;margin-bottom:36px;}
+.section-head h3{font-size:29px;margin:0 0 10px;color:var(--ink-900);}
+.section-head p{color:var(--ink-600);font-size:15px;line-height:1.6;margin:0;}
+
+/* ---------- KPI cards ---------- */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.kpi-card{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-md);
+  padding:22px 22px 20px;position:relative;overflow:hidden;
+}
+.kpi-card::after{
+  content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;
+  background:radial-gradient(circle,rgba(18,182,201,0.13),transparent 70%);
+}
+.kpi-icon{
+  width:38px;height:38px;border-radius:10px;background:var(--navy-900);
+  display:flex;align-items:center;justify-content:center;color:var(--cyan-400);margin-bottom:14px;
+}
+.kpi-label{color:var(--ink-400);font-size:13px;margin-bottom:6px;}
+.kpi-value{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--ink-900);}
+.kpi-value .unit{font-size:15px;color:var(--ink-400);font-weight:500;margin-left:3px;}
+
+/* ---------- Charts ---------- */
+.chart-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;}
+.chart-grid .span-2{grid-column:span 2;}
+.chart-card{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-md);
+  padding:22px;
+}
+.chart-card h4{margin:0 0 4px;font-size:15.5px;font-family:'Inter';font-weight:600;color:var(--ink-900);}
+.chart-card .sub{color:var(--ink-400);font-size:12.5px;margin-bottom:14px;}
+.chart-holder{position:relative;height:260px;}
+.chart-holder.tall{height:300px;}
+
+/* ---------- Insights ---------- */
+.insights-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.insight-card{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-md);
+  padding:20px 22px;display:flex;gap:14px;align-items:flex-start;
+}
+.insight-num{
+  width:30px;height:30px;flex:none;border-radius:8px;background:rgba(18,182,201,0.12);
+  color:var(--cyan-500);display:flex;align-items:center;justify-content:center;
+}
+.insight-card h5{margin:0 0 5px;font-size:14.5px;color:var(--ink-900);}
+.insight-card p{margin:0;font-size:13.8px;color:var(--ink-600);line-height:1.55;}
+
+/* ---------- Prediction section ---------- */
+.predict-section{background:var(--navy-950);color:#fff;}
+.predict-section .section-head h3{color:#fff;}
+.predict-section .section-head p{color:#9db3d1;}
+.predict-layout{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;}
+
+.form-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--radius-lg);padding:28px;
+}
+.field-group{margin-bottom:26px;}
+.field-group:last-child{margin-bottom:0;}
+.field-group-title{
+  display:flex;align-items:center;gap:9px;color:var(--cyan-400);
+  font-size:13px;font-weight:600;text-transform:none;margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.09);
+}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.field{margin-bottom:0;}
+.field label{
+  display:flex;justify-content:space-between;font-size:13px;color:#c4d2e6;margin-bottom:7px;font-weight:500;
+}
+.field label .val{color:var(--cyan-400);font-weight:600;}
+.field input[type="number"], .field select{
+  width:100%;padding:11px 13px;border-radius:9px;border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.045);color:#fff;font-size:14.5px;font-family:inherit;outline:none;
+  transition:border-color .15s;
+}
+.field select option{background:var(--navy-900);color:#fff;}
+.field input[type="number"]:focus, .field select:focus{border-color:var(--cyan-400);}
+.field input[type="range"]{width:100%;accent-color:var(--cyan-400);}
+.field .hint{font-size:11.5px;color:#7f93b3;margin-top:5px;}
+
+.predict-btn{
+  width:100%;margin-top:24px;padding:15px;border:none;border-radius:11px;
+  background:linear-gradient(135deg,var(--cyan-400),var(--cyan-500));
+  color:var(--navy-950);font-size:15.5px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  transition:transform .15s;
+}
+.predict-btn:hover{transform:translateY(-2px);}
+.predict-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+.result-card{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--radius-lg);padding:28px;min-height:420px;
+  display:flex;flex-direction:column;
+}
+.result-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:#7f93b3;gap:14px;
+}
+.result-empty .circle{
+  width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:center;color:#7f93b3;
+}
+.result-body{display:none;flex-direction:column;flex:1;}
+.result-body.active{display:flex;}
+.result-label{color:#9db3d1;font-size:13px;margin-bottom:8px;}
+.result-amount{
+  font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:700;color:var(--cyan-400);
+  margin-bottom:20px;
+}
+.result-list{border-top:1px solid rgba(255,255,255,0.09);padding-top:16px;}
+.result-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px;}
+.result-row span:first-child{color:#9db3d1;}
+.result-row span:last-child{color:#fff;font-weight:500;}
+.result-disclaimer{
+  margin-top:auto;padding-top:18px;font-size:12px;color:#7f93b3;line-height:1.5;
+  border-top:1px solid rgba(255,255,255,0.09);
+}
+.error-box{
+  display:none;margin-top:16px;padding:13px 15px;border-radius:9px;
+  background:rgba(220,80,80,0.12);border:1px solid rgba(220,80,80,0.35);
+  color:#f3a4a4;font-size:13.5px;
+}
+
+/* ---------- How it works ---------- */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+.flow-step{
+  flex:1;min-width:190px;background:var(--white);border:1px solid var(--line);
+  border-radius:var(--radius-md);padding:22px;position:relative;
+}
+.flow-step .icon-wrap{
+  width:40px;height:40px;border-radius:10px;background:var(--navy-900);color:var(--cyan-400);
+  display:flex;align-items:center;justify-content:center;margin-bottom:14px;
+}
+.flow-step h5{margin:0 0 6px;font-size:14.5px;color:var(--ink-900);}
+.flow-step p{margin:0;font-size:13px;color:var(--ink-600);line-height:1.5;}
+.flow-arrow{display:flex;align-items:center;justify-content:center;color:var(--ink-400);padding:0 6px;}
+.metrics-strip{
+  display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;
+}
+.metric-chip{
+  background:var(--white);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:12px 18px;font-size:13px;color:var(--ink-600);
+}
+.metric-chip b{color:var(--ink-900);font-family:'Space Grotesk',sans-serif;}
+
+footer{
+  background:var(--navy-950);color:#7f93b3;text-align:center;font-size:13px;padding:26px 0;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:980px){
+  .hero-grid{grid-template-columns:1fr;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .chart-grid{grid-template-columns:1fr;}
+  .chart-grid .span-2{grid-column:span 1;}
+  .insights-grid{grid-template-columns:1fr;}
+  .predict-layout{grid-template-columns:1fr;}
+  nav{display:none;}
+}
+@media (max-width:600px){
+  .wrap{padding:0 18px;}
+  .hero h2{font-size:32px;}
+  .kpi-grid{grid-template-columns:1fr;}
+  .field-grid{grid-template-columns:1fr;}
+  section{padding:46px 0;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark"><i data-lucide="shield-check" class="icon"></i></div>
+      <div class="brand-text">
+        <h1>InsuranceIQ</h1>
+        <span>Insurance Premium &amp; Risk Analytics</span>
+      </div>
+    </div>
+    <nav>
+      <a href="#overview">Overview</a>
+      <a href="#explore">Explore</a>
+      <a href="#insights">Insights</a>
+      <a href="#predict">Predict</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <div class="status-pill"><span class="status-dot"></span>Model online</div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h2>Understand risk.<br><em>Predict premiums.</em></h2>
+      <p>An analytics-driven insurance platform that combines customer, policy and risk characteristics to estimate annual insurance premiums from 2,000 real policy records.</p>
+      <div class="hero-actions">
+        <a href="#predict" class="btn btn-primary"><i data-lucide="calculator" class="icon"></i>Predict a premium</a>
+        <a href="#explore" class="btn btn-ghost"><i data-lucide="bar-chart-3" class="icon"></i>Explore the data</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-card-title">Portfolio snapshot</div>
+      <div class="hero-card-row"><span class="label">Total policies</span><span class="value" id="hero-total">—</span></div>
+      <div class="hero-card-row"><span class="label">Average premium</span><span class="value" id="hero-premium">—</span></div>
+      <div class="hero-card-row"><span class="label">Average risk score</span><span class="value" id="hero-risk">—</span></div>
+      <div class="hero-card-row"><span class="label">Model R² (holdout)</span><span class="value" id="hero-r2">—</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="predict" class="predict-section">
+  <div class="wrap">
+    <div class="section-head">
+      <h3>Predict annual insurance premium</h3>
+      <p>Enter customer and policy characteristics to estimate the expected annual premium.</p>
+    </div>
+
+    <div class="predict-layout">
+      <form class="form-card" id="predict-form">
+
+        <div class="field-group">
+          <div class="field-group-title"><i data-lucide="user" class="icon"></i>Customer profile</div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="Customer_Age">Customer age <span class="val" id="val-age">35</span></label>
+              <input type="range" id="Customer_Age" min="18" max="85" value="35">
+            </div>
+            <div class="field">
+              <label for="Annual_Income">Annual income (₹)</label>
+              <input type="number" id="Annual_Income" min="0" step="1000" placeholder="e.g. 800000" value="800000" required>
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label for="Customer_Segment">Customer segment</label>
+              <select id="Customer_Segment" required></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-title"><i data-lucide="file-text" class="icon"></i>Policy details</div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="Policy_Type">Policy type</label>
+              <select id="Policy_Type" required></select>
+            </div>
+            <div class="field">
+              <label for="Policy_Tenure_Years">Policy tenure (years) <span class="val" id="val-tenure">5</span></label>
+              <input type="range" id="Policy_Tenure_Years" min="0" max="20" step="0.5" value="5">
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label for="Insured_Value">Insured value (₹)</label>
+              <input type="number" id="Insured_Value" min="0" step="1000" placeholder="e.g. 900000" value="900000" required>
+              <div class="hint">The total sum insured under the policy</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-title"><i data-lucide="triangle-alert" class="icon"></i>Risk &amp; claims</div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="Risk_Score">Risk score <span class="val" id="val-risk">45</span></label>
+              <input type="range" id="Risk_Score" min="0" max="100" value="45">
+            </div>
+            <div class="field">
+              <label for="Claim_History_Count">Prior claims count <span class="val" id="val-claims">1</span></label>
+              <input type="range" id="Claim_History_Count" min="0" max="6" value="1">
+            </div>
+            <div class="field" style="grid-column: span 2;">
+              <label for="Previous_Claim_Amount">Previous claim amount (₹)</label>
+              <input type="number" id="Previous_Claim_Amount" min="0" step="1000" placeholder="e.g. 50000" value="50000" required>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="predict-btn" id="predict-btn">
+          <i data-lucide="sparkles" class="icon"></i>Predict annual premium
+        </button>
+        <div class="error-box" id="error-box"></div>
+      </form>
+
+      <div class="result-card">
+        <div class="result-empty" id="result-empty">
+          <div class="circle"><i data-lucide="calculator" class="icon"></i></div>
+          <div>Fill in the form and run a prediction to see the estimated annual premium here.</div>
+        </div>
+        <div class="result-body" id="result-body">
+          <div class="result-label">Estimated annual premium</div>
+          <div class="result-amount" id="result-amount">₹0</div>
+          <div class="result-list">
+            <div class="result-row"><span>Policy type</span><span id="r-policy">—</span></div>
+            <div class="result-row"><span>Customer segment</span><span id="r-segment">—</span></div>
+            <div class="result-row"><span>Risk score</span><span id="r-risk">—</span></div>
+            <div class="result-row"><span>Insured value</span><span id="r-value">—</span></div>
+          </div>
+          <div class="result-disclaimer">Estimate generated by the trained regression model and intended for analytical purposes. This is not an actual insurance quote.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="overview">
+  <div class="wrap">
+    <div class="section-head">
+      <h3>Insurance portfolio at a glance</h3>
+      <p>Key figures calculated directly from the current policy dataset.</p>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon"><i data-lucide="files" class="icon"></i></div>
+        <div class="kpi-label">Total policies</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon"><i data-lucide="indian-rupee" class="icon"></i></div>
+        <div class="kpi-label">Average annual premium</div>
+        <div class="kpi-value" id="kpi-premium">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon"><i data-lucide="gauge" class="icon"></i></div>
+        <div class="kpi-label">Average risk score</div>
+        <div class="kpi-value" id="kpi-risk">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon"><i data-lucide="landmark" class="icon"></i></div>
+        <div class="kpi-label">Average insured value</div>
+        <div class="kpi-value" id="kpi-value">—</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="explore">
+  <div class="wrap">
+    <div class="section-head">
+      <h3>Explore the portfolio</h3>
+      <p>Interactive views of how premiums relate to policy type, customer segment and risk.</p>
+    </div>
+    <div class="chart-grid">
+      <!-- <div class="chart-card span-2">
+        <h4>Premium distribution</h4>
+        <div class="sub">Number of policies across annual premium bands</div>
+        <div class="chart-holder"><canvas id="chart-distribution"></canvas></div>
+      </div> -->
+      <div class="chart-card">
+        <h4>Average premium by policy type</h4>
+        <div class="sub">Annual_Insurance_Premium, mean by Policy_Type</div>
+        <div class="chart-holder"><canvas id="chart-policy"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h4>Policies by customer segment</h4>
+        <div class="sub">Share of policies per Customer_Segment</div>
+        <div class="chart-holder"><canvas id="chart-segment"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h4>Risk score vs. premium</h4>
+        <div class="sub">Each point is one policy (sampled)</div>
+        <div class="chart-holder tall"><canvas id="chart-risk-scatter"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h4>Insured value vs. premium</h4>
+        <div class="sub">Each point is one policy (sampled)</div>
+        <div class="chart-holder tall"><canvas id="chart-value-scatter"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="insights">
+  <div class="wrap">
+    <div class="section-head">
+      <h3>What the data tells us</h3>
+      <p>Descriptive findings computed live from the dataset.</p>
+    </div>
+    <div class="insights-grid" id="insights-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <h3>How the prediction works</h3>
+      <p>The form inputs flow through the same pipeline the model was trained on.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="icon-wrap"><i data-lucide="database" class="icon"></i></div>
+        <h5>Customer &amp; policy data</h5>
+        <p>Age, income, policy type, tenure, risk score, insured value and claims history.</p>
+      </div>
+      <div class="flow-arrow"><i data-lucide="arrow-right" class="icon"></i></div>
+      <div class="flow-step">
+        <div class="icon-wrap"><i data-lucide="settings-2" class="icon"></i></div>
+        <h5>Feature processing</h5>
+        <p>Numeric fields are scaled and categorical fields (policy type, segment) are one-hot encoded.</p>
+      </div>
+      <div class="flow-arrow"><i data-lucide="arrow-right" class="icon"></i></div>
+      <div class="flow-step">
+        <div class="icon-wrap"><i data-lucide="line-chart" class="icon"></i></div>
+        <h5>Linear regression model</h5>
+        <p>A trained scikit-learn pipeline (model.pkl) combines the features into a single estimate.</p>
+      </div>
+      <div class="flow-arrow"><i data-lucide="arrow-right" class="icon"></i></div>
+      <div class="flow-step">
+        <div class="icon-wrap"><i data-lucide="badge-indian-rupee" class="icon"></i></div>
+        <h5>Predicted premium</h5>
+        <p>The estimated Annual Insurance Premium is returned to the dashboard.</p>
+      </div>
+    </div>
+    <div class="metrics-strip" id="metrics-strip"></div>
+  </div>
+</section>
+
+<footer>InsuranceIQ — analytics dashboard built with Flask, scikit-learn and Chart.js</footer>
+
+<script>
+lucide.createIcons();
+
+const INR = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+const NUM = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+
+let analyticsData = null;
+
+async function loadAnalytics() {
+  try {
+    const res = await fetch("/api/analytics");
+    const data = await res.json();
+    analyticsData = data;
+    renderKpis(data);
+    renderCharts(data);
+    renderInsights(data.insights);
+    populateDropdowns(data.dropdown_options);
+    renderMetrics(data.model_metrics);
+  } catch (err) {
+    console.error("Failed to load analytics", err);
+  }
+}
+
+function renderKpis(data) {
+  const k = data.kpis;
+  document.getElementById("kpi-total").textContent = NUM.format(k.total_policies);
+  document.getElementById("kpi-premium").textContent = INR.format(k.average_premium);
+  document.getElementById("kpi-risk").textContent = k.average_risk_score.toFixed(1);
+  document.getElementById("kpi-value").textContent = INR.format(k.average_insured_value);
+
+  document.getElementById("hero-total").textContent = NUM.format(k.total_policies);
+  document.getElementById("hero-premium").textContent = INR.format(k.average_premium);
+  document.getElementById("hero-risk").textContent = k.average_risk_score.toFixed(1);
+  const r2 = data.model_metrics && data.model_metrics.r2_score;
+  document.getElementById("hero-r2").textContent = r2 !== undefined ? r2.toFixed(3) : "—";
+}
+
+function renderMetrics(m) {
+  const el = document.getElementById("metrics-strip");
+  if (!m || !m.r2_score) { el.style.display = "none"; return; }
+  el.innerHTML = `
+    <div class="metric-chip">R² on holdout set: <b>${m.r2_score.toFixed(3)}</b></div>
+    <div class="metric-chip">Mean absolute error: <b>${INR.format(m.mae)}</b></div>
+    <div class="metric-chip">Trained on <b>${NUM.format(m.training_rows)}</b> policies</div>
+  `;
+}
+
+const chartColors = { cyan: "#12b6c9", navy: "#0b1d3a", slate: "#8894a3", teal: "#3fd0e0" };
+
+function renderCharts(data) {
+  new Chart(document.getElementById("chart-distribution"), {
+    type: "bar",
+    data: {
+      labels: data.premium_distribution.labels,
+      datasets: [{ data: data.premium_distribution.counts, backgroundColor: chartColors.cyan, borderRadius: 5, barThickness: 26 }]
+    },
+    options: baseOptions(false)
+  });
+
+  new Chart(document.getElementById("chart-policy"), {
+    type: "bar",
+    data: {
+      labels: data.premium_by_policy_type.labels,
+      datasets: [{ data: data.premium_by_policy_type.values, backgroundColor: chartColors.navy, borderRadius: 6 }]
+    },
+    options: baseOptions(false)
+  });
+
+  new Chart(document.getElementById("chart-segment"), {
+    type: "doughnut",
+    data: {
+      labels: data.segment_analysis.labels,
+      datasets: [{ data: data.segment_analysis.values, backgroundColor: ["#0b1d3a","#12b6c9","#3fd0e0","#8894a3"] }]
+    },
+    options: { plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } }, maintainAspectRatio: false }
+  });
+
+  new Chart(document.getElementById("chart-risk-scatter"), {
+    type: "scatter",
+    data: { datasets: [{ data: data.risk_vs_premium, backgroundColor: "rgba(18,182,201,0.55)", pointRadius: 3 }] },
+    options: scatterOptions("Risk score", "Annual premium (₹)")
+  });
+
+  new Chart(document.getElementById("chart-value-scatter"), {
+    type: "scatter",
+    data: { datasets: [{ data: data.value_vs_premium, backgroundColor: "rgba(11,29,58,0.55)", pointRadius: 3 }] },
+    options: scatterOptions("Insured value (₹)", "Annual premium (₹)")
+  });
+}
+
+function baseOptions(showLegend) {
+  return {
+    maintainAspectRatio: false,
+    plugins: { legend: { display: showLegend } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { grid: { color: "#eef1f6" }, ticks: { font: { size: 11 } } }
+    }
+  };
+}
+
+function scatterOptions(xLabel, yLabel) {
+  return {
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: xLabel, font: { size: 11 } }, grid: { color: "#eef1f6" } },
+      y: { title: { display: true, text: yLabel, font: { size: 11 } }, grid: { color: "#eef1f6" } }
+    }
+  };
+}
+
+function renderInsights(insights) {
+  const grid = document.getElementById("insights-grid");
+  grid.innerHTML = insights.map((ins, i) => `
+    <div class="insight-card">
+      <div class="insight-num">${i + 1}</div>
+      <div>
+        <h5>${ins.title}</h5>
+        <p>${ins.text}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+function populateDropdowns(options) {
+  const policySel = document.getElementById("Policy_Type");
+  const segSel = document.getElementById("Customer_Segment");
+  policySel.innerHTML = options.policy_types.map(p => `<option value="${p}">${p}</option>`).join("");
+  segSel.innerHTML = options.customer_segments.map(s => `<option value="${s}">${s}</option>`).join("");
+}
+
+// ---- Live range labels ----
+[["Customer_Age","val-age"],["Policy_Tenure_Years","val-tenure"],["Risk_Score","val-risk"],["Claim_History_Count","val-claims"]]
+  .forEach(([id, labelId]) => {
+    const input = document.getElementById(id);
+    const label = document.getElementById(labelId);
+    input.addEventListener("input", () => label.textContent = input.value);
+  });
+
+// ---- Prediction form ----
+const form = document.getElementById("predict-form");
+const btn = document.getElementById("predict-btn");
+const errorBox = document.getElementById("error-box");
+const resultEmpty = document.getElementById("result-empty");
+const resultBody = document.getElementById("result-body");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorBox.style.display = "none";
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" class="icon"></i>Calculating...';
+  lucide.createIcons();
+
+  const payload = {
+    Customer_Age: document.getElementById("Customer_Age").value,
+    Annual_Income: document.getElementById("Annual_Income").value,
+    Claim_History_Count: document.getElementById("Claim_History_Count").value,
+    Previous_Claim_Amount: document.getElementById("Previous_Claim_Amount").value,
+    Policy_Tenure_Years: document.getElementById("Policy_Tenure_Years").value,
+    Risk_Score: document.getElementById("Risk_Score").value,
+    Insured_Value: document.getElementById("Insured_Value").value,
+    Policy_Type: document.getElementById("Policy_Type").value,
+    Customer_Segment: document.getElementById("Customer_Segment").value
+  };
+
+  try {
+    const res = await fetch("/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      resultEmpty.style.display = "none";
+      resultBody.classList.add("active");
+      animateAmount(document.getElementById("result-amount"), data.prediction);
+      document.getElementById("r-policy").textContent = payload.Policy_Type;
+      document.getElementById("r-segment").textContent = payload.Customer_Segment;
+      document.getElementById("r-risk").textContent = payload.Risk_Score;
+      document.getElementById("r-value").textContent = INR.format(payload.Insured_Value);
+    } else {
+      throw new Error(data.error || "Prediction failed.");
+    }
+  } catch (err) {
+    errorBox.textContent = "Error: " + err.message;
+    errorBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="sparkles" class="icon"></i>Predict annual premium';
+    lucide.createIcons();
+  }
+});
+
+function animateAmount(el, target) {
+  const duration = 700;
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const current = target * progress;
+    el.textContent = INR.format(current);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+loadAnalytics();
+</script>
+
+</body>
+</html>
