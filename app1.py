@@ -4,25 +4,8 @@ app1.py
 Flask backend for the InsuranceIQ analytics + premium
 prediction dashboard.
 
-This file does NOT train or create any model. It assumes
-model.pkl already exists in the same folder and was
-trained on these 9 features, in this order:
-
-    Customer_Age, Annual_Income, Claim_History_Count,
-    Previous_Claim_Amount, Policy_Tenure_Years, Risk_Score,
-    Insured_Value, Policy_Type, Customer_Segment
-
-...to predict Annual_Insurance_Premium.
-
-If your model.pkl expects different feature names, a
-different order, or pre-encoded categoricals, edit the
-FEATURE lists and the predict() function below to match.
-
-Routes:
-    GET  /                -> serves the dashboard (index.html)
-    POST /predict         -> runs model.pkl on submitted inputs
-    GET  /api/analytics   -> KPIs, chart data and insights
-                             computed live from the CSV
+Works seamlessly on both Local Machine and Cloud Hosts
+(Render / Railway / Heroku).
 ----------------------------------------------------
 """
 
@@ -34,9 +17,16 @@ import os
 
 app = Flask(__name__)
 
-MODEL_FILE = "model.pkl"
-METRICS_FILE = "model_metrics.pkl"   # optional - see bottom of file
-CSV_FILE = "insurance_linear_regression_raw_2000.csv"
+# --------------------------------------------------
+# Safe Absolute Path Resolution
+# --------------------------------------------------
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+MODEL_FILE = os.path.join(BASE_DIR, "model.pkl")
+METRICS_FILE = os.path.join(BASE_DIR, "model_metrics.pkl")
+CSV_FILE = os.path.join(
+    BASE_DIR, "insurance_linear_regression_raw_2000.csv"
+)
 
 NUMERIC_FEATURES = [
     "Customer_Age",
@@ -52,32 +42,34 @@ TARGET = "Annual_Insurance_Premium"
 
 
 # --------------------------------------------------
-# Load the trained regression model
-# (this file never creates or trains one)
+# Load Model & Metrics Safely
 # --------------------------------------------------
 
 if not os.path.exists(MODEL_FILE):
     raise FileNotFoundError(
-        f"{MODEL_FILE} not found. Place your trained model.pkl next to app1.py."
+        f"{MODEL_FILE} not found. Place your trained model.pkl at: {MODEL_FILE}"
     )
 
 with open(MODEL_FILE, "rb") as file:
     model = pickle.load(file)
 
-# Optional: pre-computed accuracy metrics (r2_score, mae, etc.) if you have
-# them saved from wherever you trained the model. Purely cosmetic - the
-# dashboard just hides that strip if this file isn't present.
 model_metrics = {}
 if os.path.exists(METRICS_FILE):
-    with open(METRICS_FILE, "rb") as file:
-        model_metrics = pickle.load(file)
+    try:
+        with open(METRICS_FILE, "rb") as file:
+            model_metrics = pickle.load(file)
+            print(f"[SUCCESS] Loaded model_metrics.pkl: {model_metrics}")
+    except Exception as e:
+        print(f"[ERROR] Could not load model_metrics.pkl: {e}")
+        model_metrics = {}
+else:
+    print(
+        f"[INFO] {METRICS_FILE} not found. Proceeding with empty metrics."
+    )
 
 
 # --------------------------------------------------
-# Data cleaning used ONLY for the analytics dashboard
-# (KPIs / charts / insights / dropdown options).
-# This has nothing to do with the model - it just makes
-# the raw, messy CSV presentable on screen.
+# Data Cleaning (Analytics Dashboard)
 # --------------------------------------------------
 
 POLICY_TYPE_MAP = {
@@ -102,10 +94,18 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     df["Policy_Type"] = (
-        df["Policy_Type"].astype(str).str.strip().str.lower().map(POLICY_TYPE_MAP)
+        df["Policy_Type"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .map(POLICY_TYPE_MAP)
     )
     df["Customer_Segment"] = (
-        df["Customer_Segment"].astype(str).str.strip().str.lower().map(SEGMENT_MAP)
+        df["Customer_Segment"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .map(SEGMENT_MAP)
     )
 
     df["Customer_Age"] = df["Customer_Age"].clip(lower=18, upper=100)
@@ -127,22 +127,22 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 
 if not os.path.exists(CSV_FILE):
-    raise FileNotFoundError(f"{CSV_FILE} not found next to app1.py.")
+    raise FileNotFoundError(f"{CSV_FILE} not found at: {CSV_FILE}")
 
 dataset = clean_dataframe(pd.read_csv(CSV_FILE))
 
 
 # --------------------------------------------------
-# Home page
+# Home Page Route
 # --------------------------------------------------
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(BASE_DIR, "index.html")
 
 
 # --------------------------------------------------
-# Analytics API - dynamically computed from the CSV
+# Analytics API Endpoint
 # --------------------------------------------------
 
 def _safe_round(value, digits=2):
@@ -274,12 +274,11 @@ def analytics():
 
 
 # --------------------------------------------------
-# Prediction API
+# Prediction API Endpoint
 # --------------------------------------------------
 
 @app.route("/predict", methods=["POST"])
 def predict():
-
     try:
         data = request.get_json()
 
@@ -295,14 +294,11 @@ def predict():
                 raise KeyError(field)
             categorical_values[field] = str(data[field]).strip()
 
-        # Build a single-row DataFrame with the exact columns/order
-        # your model.pkl expects. Edit NUMERIC_FEATURES /
-        # CATEGORICAL_FEATURES above if yours differ.
         row = {**numeric_values, **categorical_values}
         input_data = pd.DataFrame([row])[NUMERIC_FEATURES + CATEGORICAL_FEATURES]
 
         prediction = model.predict(input_data)[0]
-        prediction = max(0.0, float(prediction))  # premiums can't be negative
+        prediction = max(0.0, float(prediction))
 
         return jsonify({
             "success": True,
@@ -310,21 +306,18 @@ def predict():
         })
 
     except KeyError as e:
-
         return jsonify({
             "success": False,
             "error": f"Missing input: {str(e)}"
         }), 400
 
     except ValueError:
-
         return jsonify({
             "success": False,
             "error": "Please enter valid numbers."
         }), 400
 
     except Exception as e:
-
         return jsonify({
             "success": False,
             "error": str(e)
@@ -332,12 +325,15 @@ def predict():
 
 
 # --------------------------------------------------
-# Run Flask application
+# Adaptive Server Execution (Local vs Cloud)
 # --------------------------------------------------
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    is_cloud = "PORT" in os.environ or "RENDER" in os.environ
+
     app.run(
-        host="127.0.0.1",
-        port=5000,
-        debug=True
+        host="0.0.0.0" if is_cloud else "127.0.0.1",
+        port=port,
+        debug=not is_cloud
     )
